@@ -27,9 +27,6 @@ Project File Date:  04/29/2026
 <h2>Output:</h2>
 *** Using Compiler 'V6.19', folder: 'D:\EmpbededKeli\ARM\ARMCLANG\Bin'
 Build target 'Target 1'
-compiling main.c...
-linking...
-Program Size: Code=16808 RO-data=692 RW-data=8 ZI-data=11984  
 ".\Objects\Lab-06.axf" - 0 Error(s), 0 Warning(s).
 
 <h2>Software Packages used:</h2>
@@ -89,26 +86,26 @@ Package Vendor: Keil
       Include file:  CMSIS/RTOS2/FreeRTOS/Config/FreeRTOSConfig.h
 
    * Component: ARM.FreeRTOS::RTOS:Core:Cortex-M:11.2.0
-      Source file:   CMSIS/RTOS2/FreeRTOS/Source/freertos_evr.c
+      Source file:   Source/tasks.c
+      Source file:   Source/portable/GCC/ARM_CM4F/port.c
       Source file:   Source/list.c
       Source file:   Source/queue.c
-      Source file:   Source/tasks.c
+      Source file:   CMSIS/RTOS2/FreeRTOS/Source/freertos_evr.c
       Include file:  Source/include/task.h
-      Source file:   Source/portable/GCC/ARM_CM4F/port.c
       Include file:  Source/include/FreeRTOS.h
-      Include file:  Source/include/semphr.h
       Include file:  Source/include/queue.h
+      Include file:  Source/include/semphr.h
 
    * Component: ARM.FreeRTOS::RTOS:Event Groups:11.2.0
-      Source file:   Source/event_groups.c
       Include file:  Source/include/event_groups.h
+      Source file:   Source/event_groups.c
 
    * Component: ARM.FreeRTOS::RTOS:Heap:Heap_4:11.2.0
       Source file:   Source/portable/MemMang/heap_4.c
 
    * Component: ARM.FreeRTOS::RTOS:Timers:11.2.0
-      Source file:   Source/timers.c
       Include file:  Source/include/timers.h
+      Source file:   Source/timers.c
 
    * Component: ARM::CMSIS:CORE:6.2.0
 
@@ -116,9 +113,9 @@ Package Vendor: Keil
       Source file:   CMSIS/RTOS2/Source/os_systick.c
 
    * Component: ARM::CMSIS:RTOS2:FreeRTOS:Cortex-M:11.2.0
+      Source file:   CMSIS/RTOS2/FreeRTOS/Source/cmsis_os2.c
       Source file:   CMSIS/RTOS2/FreeRTOS/Source/clib_os.c
       Include file:  CMSIS/RTOS2/FreeRTOS/Include/freertos_mpool.h
-      Source file:   CMSIS/RTOS2/FreeRTOS/Source/cmsis_os2.c
 
    * Component: Keil.ARM Compiler::Compiler:I/O:STDIN:ITM:1.2.0
       Source file:   Source/retarget_io.c
@@ -128,8 +125,8 @@ Package Vendor: Keil
 
    * Component: Keil::Device:Startup:1.0.1
       Source file:   Device/Source/system_TM4C123.c
-      Source file:   Device/Source/ARM/startup_TM4C123.s
       Include file:  Device/Include/TM4C123/TM4C123.h
+      Source file:   Device/Source/ARM/startup_TM4C123.s
 Build Time Elapsed:  00:00:00
 </pre>
 </body>

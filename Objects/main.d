@@ -1,6 +1,7 @@
 ./objects/main.o: main.c \
   D:\EmpbededKeli\ARM\ARMCLANG\Bin\..\include\stdint.h \
   D:\EmpbededKeli\ARM\ARMCLANG\Bin\..\include\stdbool.h \
+  D:\EmpbededKeli\ARM\ARMCLANG\Bin\..\include\stdio.h \
   ..\Lab-06\tm4c123gh6pm.h \
   D:\EmpbededKeli\ARM\CMSIS-FreeRTOS\11.2.0\Source\include\FreeRTOS.h \
   D:\EmpbededKeli\ARM\ARMCLANG\Bin\..\include\stddef.h \

@@ -1,8 +1,9 @@
 Dependencies for Project 'Lab-06', Target 'Target 1': (DO NOT MODIFY !)
 CompilerVersion: 6190000::V6.19::ARMCLANG
-F (.\main.c)(0x69F286A2)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-4 -O0 -ffunction-sections -w -I ./inc -I ../Lab-06 -I ./Required_Files-I./RTE/RTOS-I./RTE/_Target_1-ID:/EmpbededKeli/ARM/CMSIS-FreeRTOS/11.2.0/CMSIS/RTOS2/FreeRTOS/Include-ID:/EmpbededKeli/ARM/CMSIS-FreeRTOS/11.2.0/Source/include-ID:/EmpbededKeli/ARM/CMSIS-FreeRTOS/11.2.0/Source/portable/GCC/ARM_CM4F-ID:/EmpbededKeli/ARM/CMSIS/6.3.0/CMSIS/Core/Include-ID:/EmpbededKeli/ARM/CMSIS/6.3.0/CMSIS/RTOS2/Include-ID:/EmpbededKeli/Keil/TM4C_DFP/1.1.0/Device/Include/TM4C123-D__UVISION_VERSION="538" -D_RTE_ -DTM4C123GH6PM -D_RTE_-o ./objects/main.o -MD)
+F (.\main.c)(0x69FF8C1B)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-4 -O0 -ffunction-sections -w -I ./inc -I ../Lab-06 -I ./Required_Files-I./RTE/RTOS-I./RTE/_Target_1-ID:/EmpbededKeli/ARM/CMSIS-FreeRTOS/11.2.0/CMSIS/RTOS2/FreeRTOS/Include-ID:/EmpbededKeli/ARM/CMSIS-FreeRTOS/11.2.0/Source/include-ID:/EmpbededKeli/ARM/CMSIS-FreeRTOS/11.2.0/Source/portable/GCC/ARM_CM4F-ID:/EmpbededKeli/ARM/CMSIS/6.3.0/CMSIS/Core/Include-ID:/EmpbededKeli/ARM/CMSIS/6.3.0/CMSIS/RTOS2/Include-ID:/EmpbededKeli/Keil/TM4C_DFP/1.1.0/Device/Include/TM4C123-D__UVISION_VERSION="538" -D_RTE_ -DTM4C123GH6PM -D_RTE_-o ./objects/main.o -MD)
 I (D:\EmpbededKeli\ARM\ARMCLANG\include\stdint.h)(0x63889D68)
 I (D:\EmpbededKeli\ARM\ARMCLANG\include\stdbool.h)(0x63889D68)
+I (D:\EmpbededKeli\ARM\ARMCLANG\include\stdio.h)(0x63889D68)
 I (..\Lab-06\tm4c123gh6pm.h)(0x69F1DD6C)
 I (D:\EmpbededKeli\ARM\CMSIS-FreeRTOS\11.2.0\Source\include\FreeRTOS.h)(0x67E52708)
 I (D:\EmpbededKeli\ARM\ARMCLANG\include\stddef.h)(0x63889D68)
