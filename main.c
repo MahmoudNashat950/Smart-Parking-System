@@ -15,7 +15,7 @@
 #define LED_MASK     (LED_RED | LED_BLUE | LED_GREEN)
 
 #define BTN_PF4      (1U << 4) // Driver OPEN (Active Low)
-#define BTN_PE0      (1U << 0) // Driver CLOSE
+#define BTN_PF0      (1U << 0) // Driver CLOSE (Active Low, Pull-up, SW2)
 #define BTN_PE1      (1U << 1) // Security OPEN
 #define BTN_PB0      (1U << 0) // Security CLOSE
 #define BTN_PB1      (1U << 1) // Open LIMIT
@@ -96,24 +96,25 @@ static void GPIO_Init(void)
     SYSCTL_RCGCGPIO_R |= RCGCGPIO_ALL;
     while ((SYSCTL_PRGPIO_R & RCGCGPIO_ALL) != RCGCGPIO_ALL) { }
 
-    // Port F: RGB (Outputs), PF4 (Input, Pull-up)
-    GPIO_PORTF_AMSEL_R &= ~(BTN_PF4 | LED_MASK);
-    GPIO_PORTF_PCTL_R  &= ~0x000FFFF0U;   
-    GPIO_PORTF_AFSEL_R &= ~(BTN_PF4 | LED_MASK);
-    GPIO_PORTF_DIR_R   |=  LED_MASK;      
-    GPIO_PORTF_DIR_R   &= ~BTN_PF4;        
-    GPIO_PORTF_PUR_R   |=  BTN_PF4;        
-    GPIO_PORTF_DEN_R   |=  BTN_PF4 | LED_MASK;
-    GPIO_PORTF_DATA_R  &= ~LED_MASK;       
+		// Port F: RGB (Outputs), PF4 SW1 (Input, Pull-up), PF0 SW2 (Input, Pull-up)
+		GPIO_PORTF_LOCK_R  =  0x4C4F434B;          // Unlock PF0 (SW2 is locked by default)
+		GPIO_PORTF_CR_R    |=  BTN_PF0;            // Commit PF0
+		GPIO_PORTF_AMSEL_R &= ~(BTN_PF4 | BTN_PF0 | LED_MASK);
+		GPIO_PORTF_PCTL_R  &= ~0x000FFFF1U;        // also clear PF0 PCTL bits
+		GPIO_PORTF_AFSEL_R &= ~(BTN_PF4 | BTN_PF0 | LED_MASK);
+		GPIO_PORTF_DIR_R   |=  LED_MASK;
+		GPIO_PORTF_DIR_R   &= ~(BTN_PF4 | BTN_PF0);
+		GPIO_PORTF_PUR_R   |=  (BTN_PF4 | BTN_PF0);
+		GPIO_PORTF_DEN_R   |=  BTN_PF4 | BTN_PF0 | LED_MASK;
+		GPIO_PORTF_DATA_R  &= ~LED_MASK;
 
-    // Port E: PE0, PE1 (Inputs, Pull-down)
-    GPIO_PORTE_AMSEL_R &= ~(BTN_PE0 | BTN_PE1);
-    GPIO_PORTE_PCTL_R  &= ~0x000000FFU;
-    GPIO_PORTE_AFSEL_R &= ~(BTN_PE0 | BTN_PE1);
-    GPIO_PORTE_DIR_R   &= ~(BTN_PE0 | BTN_PE1);
-    GPIO_PORTE_PDR_R   |=  (BTN_PE0 | BTN_PE1); // Using pull-down for active-high
-    GPIO_PORTE_DEN_R   |=  (BTN_PE0 | BTN_PE1);
-
+		// Port E: only PE1 remains (Security OPEN) — remove PE0
+		GPIO_PORTE_AMSEL_R &= ~BTN_PE1;
+		GPIO_PORTE_PCTL_R  &= ~0x000000F0U;        // only PE1 bits
+		GPIO_PORTE_AFSEL_R &= ~BTN_PE1;
+		GPIO_PORTE_DIR_R   &= ~BTN_PE1;
+		GPIO_PORTE_PDR_R   |=  BTN_PE1;
+		GPIO_PORTE_DEN_R   |=  BTN_PE1;
     // Port B: PB0, PB1 (Inputs, Pull-down)
     GPIO_PORTB_AMSEL_R &= ~(BTN_PB0 | BTN_PB1);
     GPIO_PORTB_PCTL_R  &= ~0x000000FFU;
@@ -135,7 +136,7 @@ static void GPIO_Init(void)
 /* BUTTON HELPERS                                            */
 /* ========================================================= */
 static inline bool Btn_PF4(void) { return (GPIO_PORTF_DATA_R & BTN_PF4) == 0; } // Active-low
-static inline bool Btn_PE0(void) { return (GPIO_PORTE_DATA_R & BTN_PE0) != 0; }
+static inline bool Btn_PF0(void) { return (GPIO_PORTF_DATA_R & BTN_PF0) == 0; } // Active-low
 static inline bool Btn_PE1(void) { return (GPIO_PORTE_DATA_R & BTN_PE1) != 0; }
 static inline bool Btn_PB0(void) { return (GPIO_PORTB_DATA_R & BTN_PB0) != 0; }
 static inline bool Btn_PB1(void) { return (GPIO_PORTB_DATA_R & BTN_PB1) != 0; }
@@ -154,7 +155,7 @@ void InputTask(void *pv)
     while (1)
     {
         cur[0] = Btn_PF4(); // DRV_OPEN
-        cur[1] = Btn_PE0(); // DRV_CLOSE
+        cur[1] = Btn_PF0(); // DRV_CLOSE
         cur[2] = Btn_PE1(); // SEC_OPEN
         cur[3] = Btn_PB0(); // SEC_CLOSE
         cur[4] = Btn_PB1(); // LIMIT_OPEN
@@ -224,46 +225,43 @@ void InputTask(void *pv)
     }
 }
 
-/* ========================================================= */
-/* SAFETY TASK (Priority 4 - Highest)                        */
-/* ========================================================= */
 void SafetyTask(void *pv)
 {
     uint8_t trigger;
     while (1)
     {
-        // Wait for an obstacle event from InputTask
         if (xQueueReceive(xSafetyQueue, &trigger, portMAX_DELAY))
         {
+            // TC-09: Obstacle detection ignored during OPENING
+            // Only triggers while CLOSING (TC-07, TC-08)
             xSemaphoreTake(xStateMutex, portMAX_DELAY);
-            
-            // Only triggers while CLOSING (TC-09)
-            if (gateState == CLOSING)
-            {
-                // Sequence matches the FSM diagram precisely (TC-07)
-                gateState = STOPPED_MIDWAY;
-                Debug_PrintState(gateState);
-                xSemaphoreGive(xStateMutex);
-                vTaskDelay(pdMS_TO_TICKS(50)); // Brief mechanical stop
+            bool shouldReverse = (gateState == CLOSING);
+            xSemaphoreGive(xStateMutex);
 
+            if (shouldReverse)
+            {
+                // TC-07: Immediately reverse — Green LED ON (handled by LEDTask)
                 xSemaphoreTake(xStateMutex, portMAX_DELAY);
                 gateState = REVERSING;
                 Debug_PrintState(gateState);
                 xSemaphoreGive(xStateMutex);
-                vTaskDelay(pdMS_TO_TICKS(500)); // Reverse for 0.5s
 
+                // TC-07: Reverse for 0.5s
+                vTaskDelay(pdMS_TO_TICKS(500));
+
+                // TC-07: After reversal, stop at STOPPED_MIDWAY
+                // unless a limit switch already moved us to IDLE_OPEN
                 xSemaphoreTake(xStateMutex, portMAX_DELAY);
-                // Ensure a limit switch didn't catch it during reversal
                 if (gateState == REVERSING) {
                     gateState = STOPPED_MIDWAY;
                     Debug_PrintState(gateState);
                 }
+                xSemaphoreGive(xStateMutex);  // ? always paired — no unmatched give
             }
-            xSemaphoreGive(xStateMutex);
+            // TC-09: if not CLOSING, do nothing — obstacle silently ignored
         }
     }
 }
-
 /* ========================================================= */
 /* GATE FSM TASK (Priority 2)                                */
 /* ========================================================= */
@@ -285,13 +283,16 @@ void GateTask(void *pv)
             {
                 case EV_DRV_OPEN_PRESS:
                 case EV_SEC_OPEN_PRESS:
-                    if (gateState != IDLE_OPEN) gateState = OPENING;
+                  if (gateState != IDLE_OPEN && gateState != REVERSING) 
+                       gateState = OPENING;
                     break;
 
                 case EV_DRV_CLOSE_PRESS:
                 case EV_SEC_CLOSE_PRESS:
-                    if (gateState != IDLE_CLOSED) gateState = CLOSING;
-                    break;
+                    if (gateState != IDLE_CLOSED && gateState != REVERSING) 
+                      gateState = CLOSING;
+										  break;
+										
 
                 case EV_DRV_OPEN_RELEASE:
                 case EV_SEC_OPEN_RELEASE:
